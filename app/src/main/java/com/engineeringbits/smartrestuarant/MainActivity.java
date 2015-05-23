@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 
 
 public class MainActivity extends Activity {
@@ -35,5 +36,13 @@ public class MainActivity extends Activity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void updateUI() {
+        //TextView mLat = (TextView) findViewById(R.id.mLatitudeText);
+        //TextView mLong = (TextView) findViewById(R.id.mLongitudeText);
+        //mLat.setText(String.valueOf(mCurrentLocation.getLatitude()));
+        //mLong.setText(String.valueOf(mCurrentLocation.getLongitude()));
+        //mLastUpdateTimeTextView.setText(mLastUpdateTime);
     }
 }
