@@ -1,17 +1,23 @@
 package com.engineeringbits.smartrestuarant;
 
 import android.app.Activity;
+import android.content.Context;
 import android.location.Location;
 import android.location.LocationListener;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.content.Intent;
 import android.view.View;
-import android.widget.EditText;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 import com.google.gson.Gson;
+
+import java.util.List;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
@@ -29,8 +35,6 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        //ResponseData data = new Gson().fromJson(json, ResponseData.class);
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Log.d(TAG, "before calling createRequest");
@@ -38,7 +42,6 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
         Log.d(TAG, "after calling createRequest");
         buildGoogleApiClient(); // call the func fused location provider
         Log.d(TAG, "after calling buildGoogleApiClient");
-
     }
 
     @Override
@@ -102,7 +105,7 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
 
     protected void startLocationUpdates() {
     LocationServices.FusedLocationApi.requestLocationUpdates(
-                mGoogleApiClient, mLocationRequest, this);
+            mGoogleApiClient, mLocationRequest, this);
     }
 
     @Override
@@ -114,5 +117,78 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
     private void updateUI() {
         Log.d(TAG, "lat is"+String.valueOf(mCurrentLocation.getLatitude()));
         Log.d(TAG, "long is"+String.valueOf(mCurrentLocation.getLongitude()));
+        ListView listView = (ListView) findViewById(R.id.listview);
+        SmartRestaurantAdapter adapter = new SmartRestaurantAdapter();
+        listView.setAdapter(adapter);
+    }
+
+    public class SmartRestaurantAdapter extends BaseAdapter {
+
+        List<com.engineeringbits.smartrestuarant.ResponseData.Location> locations = getResults();
+
+        @Override
+        public int getCount() {
+            return locations.size();
+        }
+
+        @Override
+        public Object getItem(int position) {
+            return locations.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+
+            if(convertView == null)
+            {
+                LayoutInflater inflater = (LayoutInflater) MainActivity.this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                convertView = inflater.inflate(R.layout.list_item, parent, false);
+            }
+
+            TextView name = (TextView)convertView.findViewById(R.id.textView1);
+            TextView vicinity = (TextView)convertView.findViewById(R.id.textView2);
+            TextView open = (TextView)convertView.findViewById(R.id.textView3);
+
+            ResponseData.Location location = locations.get(position);
+
+            name.setText(location.getName());
+            vicinity.setText(location.getVicinity());
+            open.setText(location.getHours().openStatus());
+
+            return convertView;
+        }
+
+    }
+
+    private List<ResponseData.Location> getResults(){
+        String json = "{\n" +
+                "   \"html_attributions\" : [],\n" +
+                "   \"results\" : [\n" +
+                "      {\n" +
+                "         \"name\" : \"Australian Cruise Group\",\n" +
+                "         \"vicinity\" : \"32 The Promenade, King Street Wharf 5, Sydney\",\n" +
+                "         \"opening_hours\" : {\n" +
+                "            \"open_now\" : false,\n" +
+                "            \"weekday_text\" : []\n" +
+                "           }\n" +
+                "      },\n" +
+                "      {\n" +
+                "         \"name\" : \"McDonalds\",\n" +
+                "         \"vicinity\" : \"123 Some Building, 123 Fake Street, Victoria\",\n" +
+                "         \"opening_hours\" : {\n" +
+                "            \"open_now\" : true,\n" +
+                "            \"weekday_text\" : []\n" +
+                "           }\n" +
+                "      }\n" +
+                "    ]\n" +
+                "}";
+        ResponseData data = new Gson().fromJson(json, ResponseData.class);
+
+        return data.getResults();
     }
 }
